@@ -216,7 +216,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
             XXXXXXX , XXXXXXX      , KC_1     , KC_2      , KC_3     , KC_4       , KC_5         , /*    */ KC_6         , KC_7        , KC_8     , KC_9      , KC_0        , TG(_GAM) , XXXXXXX ,
             XXXXXXX , XXXXXXX      , KC_Q     , KC_W      , KC_E     , KC_R       , KC_T         , /*    */ KC_Y         , KC_U        , KC_I     , KC_O      , KC_P        , XXXXXXX  , XXXXXXX ,
             XXXXXXX , C(A(KC_DEL)) , LW(KC_A) , MOR(KC_S) , LA(KC_D) , LC(KC_F)   , LS(KC_G)     , /*    */ RS(KC_H)     , RC(KC_J)    , RA(KC_K) , MOR(KC_L) , LW(KC_SCLN) , XXXXXXX  , XXXXXXX ,
-            XXXXXXX , XXXXXXX      , KC_Z     , KC_X      , KC_C     , KC_V       , KC_B         , /*    */ KC_N         , KC_M        , KC_COMM  , KC_DOT    , KC_SLSH     , XXXXXXX  , XXXXXXX ,
+            XXXXXXX , G(KC_L)      , KC_Z     , KC_X      , KC_C     , KC_V       , KC_B         , /*    */ KC_N         , KC_M        , KC_COMM  , KC_DOT    , KC_SLSH     , KC_PSCR  , XXXXXXX ,
             XXXXXXX , KC_LCTL      , XXXXXXX  , XXXXXXX   , LHYPR    , LS(KC_ESC) , SPC_OR(_NAV) , /*    */ ENT_OR(_SYM) , RS(KC_BSPC) , RHYPR    , XXXXXXX   , XXXXXXX     , MO(_QMK) , XXXXXXX
             ),
 
