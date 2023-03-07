@@ -69,7 +69,6 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 enum tap_dances {
     // Advanced tap dances
     TD_S_MEDIA,
-    TD_S_DOT,
     TD_GHLT2,
 
     // Intermediate tap dances
@@ -119,7 +118,6 @@ void finish_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
     switch (states[TD_GHLT2]) {
         case TD_SINGLE_TAP:
         case TD_SINGLE_HOLD:
-        case TD_SINGLE_TAP_INTERRUPTED:
             register_code(KC_LSFT); break;
 
         case TD_DOUBLE_TAP:
@@ -127,10 +125,8 @@ void finish_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
             tap_code(KC_ESC); break;
 
         case TD_DOUBLE_HOLD:
+        case TD_SINGLE_TAP_INTERRUPTED:
             layer_on(_GA2); break;
-
-        case TD_TRIPLE_TAP:
-            tap_code(KC_LWIN); break;
 
         default: break;
     }
@@ -139,10 +135,10 @@ void reset_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
     switch (states[TD_GHLT2]) {
         case TD_SINGLE_TAP:
         case TD_SINGLE_HOLD:
-        case TD_SINGLE_TAP_INTERRUPTED:
             unregister_code(KC_LSFT); break;
 
         case TD_DOUBLE_HOLD:
+        case TD_SINGLE_TAP_INTERRUPTED:
             layer_off(_GA2); break;
 
         default: break;
@@ -170,22 +166,6 @@ void reset_s_media(qk_tap_dance_state_t *state, void *user_data) {
     states[TD_S_MEDIA] = TD_UNKNOWN;
 }
 
-void each_s_dot(qk_tap_dance_state_t *state, void *user_data) {
-    switch (state->count) {
-        case 2:
-            if (!(get_mods() & MOD_MASK_SHIFT)) {
-                tap_code(KC_SPC);
-                add_oneshot_mods(MOD_BIT(KC_LSFT));
-            } else tap_code(KC_DOT);
-            break;
-        case 3:
-            if (!(get_mods() & MOD_MASK_SHIFT)) tap_code(KC_BSPC);
-            tap_code(KC_DOT);
-            break;
-        default: tap_code(KC_DOT);
-    }
-};
-
 void f1_(qk_tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 12: tap_code(KC_F1 + state->count - 1);
@@ -209,7 +189,6 @@ void f9_(qk_tap_dance_state_t *state, void *user_data) {
 
 qk_tap_dance_action_t tap_dance_actions[] = {
     [TD_S_MEDIA] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, finish_s_media, reset_s_media),
-    [TD_S_DOT] = ACTION_TAP_DANCE_FN_ADVANCED(each_s_dot, NULL, NULL),
     [TD_GHLT2] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, finish_ghlt2, reset_ghlt2),
 
     [TD_F1_] = ACTION_TAP_DANCE_FN(f1_),
@@ -228,7 +207,6 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 #define F1_ TD(TD_F1_)
 #define F5_ TD(TD_F5_)
 #define F9_ TD(TD_F9_)
-#define S_DOT TD(TD_S_DOT)
 #define S_MEDIA TD(TD_S_MEDIA)
 #define Z_UN LT(0, KC_Z)
 #define X_CU LT(0, KC_X)
@@ -260,6 +238,8 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 #define HRI RCTL_T(KC_J)
 #define HRX RSFT_T(KC_H)
 
+#define URM LT(_MOU, KC_I)
+
 #define GHLT2 TD(TD_GHLT2)
 
 static bool is_alt_tab_active = false;
@@ -270,39 +250,27 @@ enum custom_keycodes {
 };
 
 const uint16_t PROGMEM capsword[] = {HLT2, HRT2, COMBO_END};
-const uint16_t PROGMEM mo_mou[]   = {HRT2, HRM, COMBO_END};
-const uint16_t PROGMEM tg_ga1[]   = {HRT2, HRI, HRM, HRR, HRP, COMBO_END};
+const uint16_t PROGMEM tg_ga1[]   = {HRT2, HRI, HRM, HRR, COMBO_END};
 const uint16_t PROGMEM tab[]      = {HLT2, HLP, COMBO_END};
 const uint16_t PROGMEM quote[]    = {HRT2, HRP, COMBO_END};
-const uint16_t PROGMEM oslsft[]   = {HLI, KC_R, COMBO_END};
-const uint16_t PROGMEM osrsft[]   = {HRI, KC_U, COMBO_END};
-const uint16_t PROGMEM oslctl[]   = {HLI, V_PA, COMBO_END};
-const uint16_t PROGMEM osrctl[]   = {HRI, KC_M, COMBO_END};
-const uint16_t PROGMEM oslalt[]   = {HLX, KC_B, COMBO_END};
-const uint16_t PROGMEM osralt[]   = {HRX, KC_N, COMBO_END};
 const uint16_t PROGMEM gctrl[]    = {HLT2, KC_Q, COMBO_END};
 const uint16_t PROGMEM gshift[]   = {HLT2, HLP, COMBO_END};
 const uint16_t PROGMEM g1[]       = {HLT2, KC_W, COMBO_END};
 const uint16_t PROGMEM g2[]       = {HLT2, KC_R, COMBO_END};
-const uint16_t PROGMEM g3[]       = {HLT2, X_CU, COMBO_END};
+const uint16_t PROGMEM g3[]       = {HLT2, HLX, COMBO_END};
 const uint16_t PROGMEM g4[]       = {HLT2, V_PA, COMBO_END};
-const uint16_t PROGMEM g5[]       = {HLT2, KC_T, COMBO_END};
-const uint16_t PROGMEM g6[]       = {HLT2, KC_B, COMBO_END};
+const uint16_t PROGMEM g5[]       = {HLT2, C_CO, COMBO_END};
+const uint16_t PROGMEM g6[]       = {HLT2, X_CU, COMBO_END};
+const uint16_t PROGMEM gtab[]       = {HLT2, KC_T, COMBO_END};
+const uint16_t PROGMEM ggrave[]       = {HLT2, KC_B, COMBO_END};
 combo_t key_combos[] = {
     // Always available
     COMBO(capsword, CW_TOGG),
-    COMBO(mo_mou, TT(_MOU)),
     COMBO(tg_ga1, TG(_GA1)),
 
     // Disabled when gaming
     COMBO(tab, KC_TAB),
     COMBO(quote, KC_QUOT),
-    COMBO(oslsft, OSLSFT),
-    COMBO(osrsft, OSRSFT),
-    COMBO(oslctl, OSLCTL),
-    COMBO(osrctl, OSRCTL),
-    COMBO(oslalt, OSLALT),
-    COMBO(osralt, OSRALT),
 
     // Gaming only
     COMBO(gctrl, KC_LCTL),
@@ -313,14 +281,16 @@ combo_t key_combos[] = {
     COMBO(g4, KC_4),
     COMBO(g5, KC_5),
     COMBO(g6, KC_6),
+    COMBO(gtab, KC_TAB),
+    COMBO(ggrave, KC_GRV),
 };
 uint16_t COMBO_LEN = ARRAY_SIZE(key_combos);
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
     switch (combo_index) {
-        case 3 ... 10:
+        case 2 ... 3:
             return !IS_LAYER_ON(_GA1);
-        case 11 ... 100:
+        case 4 ... 100:
             return IS_LAYER_ON(_GA1);
         default:
             return true;
@@ -330,9 +300,9 @@ bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_DEF] = LAYOUT_ortho_5x14(
-    _______ , _______ , KC_W    , KC_E    , KC_R    , KC_T    , _______ , /*    */ _______ , KC_Y    , KC_U    , KC_I    , KC_O    , _______ , _______ ,
+    _______ , _______ , KC_W    , KC_E    , KC_R    , KC_T    , _______ , /*    */ _______ , KC_Y    , KC_U    , URM     , KC_O    , _______ , _______ ,
     _______ , KC_Q    , HLR     , HLM     , HLI     , HLX     , _______ , /*    */ _______ , HRX     , HRI     , HRM     , HRR     , KC_P    , _______ ,
-    _______ , HLP     , X_CU    , C_CO    , V_PA    , KC_B    , _______ , /*    */ _______ , KC_N    , KC_M    , KC_COMM , S_DOT    , HRP     , _______ ,
+    _______ , HLP     , X_CU    , C_CO    , V_PA    , KC_B    , _______ , /*    */ _______ , KC_N    , KC_M    , KC_COMM , KC_DOT  , HRP     , _______ ,
     _______ , Z_UN    , _______ , _______ , QK_LEAD , HLT2    , _______ , /*    */ _______ , HRT2    , QK_LEAD , _______ , _______ , KC_SLSH , _______ ,
     _______ , _______ , _______ , _______ , _______ , _______ , HLT1    , /*    */ HRT1    , _______ , _______ , _______ , _______ , _______ , _______
 ),
@@ -346,11 +316,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_GA2] = LAYOUT_ortho_5x14(
-    _______ , _______ , _______  , MO(_FUN) , _______  , ALT_TAB , _______ , /*    */ _______ , _______ , _______  , _______ , _______ , _______ , _______ ,
-    _______ , _______ , S(KC_F2) , MO(_NUM) , KC_F2    , KC_GRV  , _______ , /*    */ _______ , OSRSFT  , OSRCTL   , _______ , OSRALT  , _______ , _______ ,
-    _______ , KC_TAB  , _______  , _______  , _______  , _______ , _______ , /*    */ _______ , _______ , _______  , _______ , _______ , _______ , _______ ,
-    _______ , KC_LALT , _______  , _______  , TG(_GA2) , _______ , _______ , /*    */ _______ , KC_LCTL , TG(_GA2) , _______ , _______ , _______ , _______ ,
-    _______ , _______ , _______  , _______  , _______  , _______ , _______ , /*    */ KC_LALT , _______ , _______  , _______ , _______ , _______ , _______
+    _______ , _______ , _______  , MO(_FUN) , _______  , ALT_TAB , _______ , /*    */ _______ , _______ , _______  , MO(_NAV)  , _______ , _______ , _______ ,
+    _______ , _______ , S(KC_F2) , MO(_NUM) , KC_F2    , KC_GRV  , _______ , /*    */ _______ , OSRSFT  , OSRCTL   , MO(_SYM) , OSRALT  , _______ , _______ ,
+    _______ , KC_TAB  , _______  , _______  , _______  , _______ , _______ , /*    */ _______ , _______ , _______  , _______  , _______ , KC_LGUI , _______ ,
+    _______ , KC_LALT , _______  , _______  , TG(_GA2) , _______ , _______ , /*    */ _______ , KC_LCTL , TG(_GA2) , _______  , _______ , _______ , _______ ,
+    _______ , _______ , _______  , _______  , _______  , _______ , _______ , /*    */ KC_LALT , _______ , _______  , _______  , _______ , _______ , _______
 ),
 
 [_MOU] = LAYOUT_ortho_5x14(
@@ -370,7 +340,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_FUN] = LAYOUT_ortho_5x14(
-    _______ , _______ , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , _______  , _______ , CLOSE   , _______ , _______ ,
+    _______ , _______ , _______ , _______ , _______  , ALT_TAB , _______ , /*    */ _______ , _______ , _______  , _______ , CLOSE   , _______ , _______ ,
     _______ , _______ , OSLALT  , _______ , OSLCTL   , OSLSFT  , _______ , /*    */ _______ , _______ , F1_      , F5_     , F9_     , KC_VOLU , _______ ,
     _______ , _______ , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , SNIP     , LOCK    , TASKS   , S_MEDIA , _______ ,
     _______ , _______ , _______ , _______ , TG(_FUN) , _______ , _______ , /*    */ _______ , _______ , TG(_FUN) , _______ , _______ , KC_VOLD , _______ ,
@@ -389,7 +359,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______ , _______ , KC_HOME , KC_UP   , KC_END   , ALT_TAB , _______ , /*    */ _______ , _______ , _______  , _______ , _______ , _______ , _______ ,
     _______ , KC_INS  , KC_LEFT , KC_DOWN , KC_RIGHT , KC_PGUP , _______ , /*    */ _______ , OSRSFT  , OSRCTL   , _______ , OSRALT  , _______ , _______ ,
     _______ , KC_TAB  , _______ , _______ , _______  , KC_PGDN , _______ , /*    */ _______ , _______ , _______  , _______ , _______ , _______ , _______ ,
-    _______ , KC_DEL  , _______ , _______ , TG(_NAV) , KC_DEL  , _______ , /*    */ _______ , _______ , TG(_NAV) , _______ , _______ , _______ , _______ ,
+    _______ , KC_DEL  , _______ , _______ , TG(_NAV) , _______  , _______ , /*    */ _______ , _______ , TG(_NAV) , _______ , _______ , _______ , _______ ,
     _______ , _______ , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , _______  , _______ , _______ , _______ , _______
 ),
 
@@ -460,6 +430,7 @@ void matrix_scan_user(void) {
         leading = false;
 
         SEQ_ONE_KEY(KC_E) { tap_code16(G(KC_E)); }
+        SEQ_ONE_KEY(HRT1) { tap_code(KC_DEL); }
 
         SEQ_TWO_KEYS(QK_LEAD, HLT1) { layer_on(_FUN); }
         SEQ_TWO_KEYS(QK_LEAD, HRT1) { layer_on(_NAV); }
@@ -486,14 +457,14 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
         case HRI:
         case HRX:
 
+        case URM:
+
         case Z_UN:
         case X_CU:
         case C_CO:
         case V_PA:
-            return tapping_term * 1.2;
-
         case GHLT2:
-            return tapping_term * 1.5;
+            return tapping_term * 1.1;
     }
     return tapping_term;
 }
