@@ -1,4 +1,4 @@
-SRC += features/layer_lock.c
+SRC += features/flow.c
 SRC += features/achordion.c
 
 # VIA just stopped updating my keymaps without clearing EEPROM. I guess it wasn't working properly before.

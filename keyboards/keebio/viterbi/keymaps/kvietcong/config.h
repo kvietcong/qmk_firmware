@@ -41,3 +41,5 @@
 #define RGBLED_SPLIT { 5, 5 }
 #define RGBLIGHT_TIMEOUT 200000
 
+#define FLOW_COUNT 12
+#define FLOW_LAYERS_COUNT 9

@@ -2,6 +2,7 @@
 
 #include QMK_KEYBOARD_H
 #include "features/achordion.h"
+#include "features/flow.h"
 
 enum layers {
     _DEF,
@@ -78,6 +79,16 @@ enum tap_dances {
 enum custom_keycodes {
     ALT_TAB = SAFE_RANGE,
     OS_CLR,
+
+    OS_DEF,
+    OS_GA1,
+    OS_GA2,
+    OS_GA3,
+    OS_MOU,
+    OS_NUM,
+    OS_FUN,
+    OS_SYM,
+    OS_NAV,
 };
 
 typedef enum {
@@ -96,7 +107,7 @@ typedef enum {
 static tap_state_t states[TD_GHLT2 + 1];
 
 // TODO: Is this even needed. I should just check state manually?
-tap_state_t current_dance(qk_tap_dance_state_t* state) {
+tap_state_t current_dance(tap_dance_state_t* state) {
     if (state->count == 1) {
         if (state->interrupted) return TD_SINGLE_TAP_INTERRUPTED;
         else if (state->pressed) return TD_SINGLE_HOLD;
@@ -112,7 +123,7 @@ tap_state_t current_dance(qk_tap_dance_state_t* state) {
     } else return TD_UNKNOWN;
 }
 
-void finish_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
+void finish_ghlt2(tap_dance_state_t* state, void* user_data) {
     states[TD_GHLT2] = current_dance(state);
     switch (states[TD_GHLT2]) {
         case TD_SINGLE_TAP:
@@ -130,7 +141,7 @@ void finish_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
         default: break;
     }
 }
-void reset_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
+void reset_ghlt2(tap_dance_state_t* state, void* user_data) {
     switch (states[TD_GHLT2]) {
         case TD_SINGLE_TAP:
         case TD_SINGLE_HOLD:
@@ -145,7 +156,7 @@ void reset_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
     states[TD_GHLT2] = TD_UNKNOWN;
 }
 
-void finish_s_media(qk_tap_dance_state_t* state, void* user_data) {
+void finish_s_media(tap_dance_state_t* state, void* user_data) {
     states[TD_S_MEDIA] = current_dance(state);
     switch (states[TD_S_MEDIA]) {
         case TD_SINGLE_TAP: tap_code(KC_MPLY); break;
@@ -156,7 +167,7 @@ void finish_s_media(qk_tap_dance_state_t* state, void* user_data) {
         default: break;
     }
 }
-void reset_s_media(qk_tap_dance_state_t *state, void *user_data) {
+void reset_s_media(tap_dance_state_t *state, void *user_data) {
     switch (states[TD_S_MEDIA]) {
         case TD_SINGLE_HOLD: unregister_code(KC_MFFD); break;
         case TD_DOUBLE_HOLD: unregister_code(KC_MRWD); break;
@@ -165,28 +176,28 @@ void reset_s_media(qk_tap_dance_state_t *state, void *user_data) {
     states[TD_S_MEDIA] = TD_UNKNOWN;
 }
 
-void f1_(qk_tap_dance_state_t *state, void *user_data) {
+void f1_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 12: tap_code(KC_F1 + state->count - 1);
     }
     reset_tap_dance(state);
 }
 
-void f5_(qk_tap_dance_state_t *state, void *user_data) {
+void f5_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 8: tap_code(KC_F5 + state->count - 1);
     }
     reset_tap_dance(state);
 }
 
-void f9_(qk_tap_dance_state_t *state, void *user_data) {
+void f9_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 4: tap_code(KC_F9 + state->count - 1);
     }
     reset_tap_dance(state);
 }
 
-qk_tap_dance_action_t tap_dance_actions[] = {
+tap_dance_action_t tap_dance_actions[] = {
     [TD_S_MEDIA] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, finish_s_media, reset_s_media),
     [TD_GHLT2] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, finish_ghlt2, reset_ghlt2),
 
@@ -236,7 +247,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 static bool is_alt_tab_active = false;
 static uint16_t alt_tab_timer = 0;
 
-const uint16_t PROGMEM capsword[] = {HLT2, HRT2, COMBO_END};
+const uint16_t PROGMEM capsword[] = {OS_NUM, OS_NAV, COMBO_END};
 const uint16_t PROGMEM tg_ga1[]   = {HLT2, KC_B, COMBO_END};
 const uint16_t PROGMEM tab[]      = {HLT2, HLM, COMBO_END};
 const uint16_t PROGMEM quote[]    = {HRT2, HRM, COMBO_END};
@@ -266,14 +277,37 @@ bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode
     }
 }
 
+const uint16_t flow_config[FLOW_COUNT][2] = {
+    {OS_NUM, KC_LALT},
+    {OS_NUM, KC_LCTL},
+    {OS_NUM, KC_LSFT},
+
+    {OS_NAV, KC_RALT},
+    {OS_NAV, KC_RCTL},
+    {OS_NAV, KC_RSFT},
+};
+
+
+const uint16_t flow_layers_config[FLOW_LAYERS_COUNT][2] = {
+    {OS_DEF, _DEF},
+    {OS_GA1, _GA1},
+    {OS_GA2, _GA2},
+    {OS_GA3, _GA3},
+    {OS_MOU, _MOU},
+    {OS_NUM, _NUM},
+    {OS_FUN, _FUN},
+    {OS_SYM, _SYM},
+    {OS_NAV, _NAV},
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_DEF] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , KC_W    , KC_E    , R_SN    , KC_T    , _______ , /*    */ _______ , KC_Y    , KC_U    , URM     , KC_O    , _______ , XXXXXXX ,
-    XXXXXXX , KC_Q    , HLR     , HLM     , HLI     , HLX     , _______ , /*    */ _______ , HRX     , HRI     , HRM     , HRR     , KC_P    , XXXXXXX ,
-    XXXXXXX , HLP     , X_CU    , C_CO    , V_PA    , KC_B    , _______ , /*    */ _______ , KC_N    , KC_M    , KC_COMM , KC_DOT  , HRP     , XXXXXXX ,
-    XXXXXXX , Z_UN    , _______ , _______ , _______ , HLT2    , HLT1    , /*    */ HRT1    , HRT2    , _______ , _______ , _______ , KC_SLSH , XXXXXXX
+    XXXXXXX , KC_Q    , KC_S    , KC_D    , KC_F    , KC_G    , _______ , /*    */ _______ , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , XXXXXXX ,
+    XXXXXXX , KC_A    , X_CU    , C_CO    , V_PA    , KC_B    , _______ , /*    */ _______ , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SCLN , XXXXXXX ,
+    XXXXXXX , Z_UN    , _______ , _______ , _______ , OS_NUM  , HLT1    , /*    */ HRT1    , OS_NAV  , _______ , _______ , _______ , KC_SLSH , XXXXXXX
 ),
 
 [_GA1] = LAYOUT_ortho_5x14(
@@ -295,7 +329,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_GA3] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______  , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , _______  , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , _______ , S(KC_F2) , _______ , KC_F2   , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
+    XXXXXXX , _______ , S(KC_F2) , _______ , KC_F2   , _______ , _______ , /*    */ _______ , _______ , KC_RCTL, KC_RSFT , KC_RALT , KC_RGUI , XXXXXXX ,
     XXXXXXX , _______ , _______  , KC_LGUI , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , _______  , _______ , OS_CLR  , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX
 ),
@@ -303,7 +337,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_MOU] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , KC_WH_L , KC_MS_U , KC_WH_R , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , _______ , KC_MS_L , KC_MS_D , KC_MS_R , KC_WH_U , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
+    XXXXXXX , _______ , KC_MS_L , KC_MS_D , KC_MS_R , KC_WH_U , _______ , /*    */ _______ , _______ , KC_RCTL, KC_RSFT , KC_RALT , KC_RGUI , XXXXXXX ,
     XXXXXXX , KC_BTN1 , _______ , _______ , _______ , KC_WH_D , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , KC_BTN2 , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX
 ),
@@ -311,15 +345,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_NUM] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , KC_PPLS , KC_7    , KC_8    , KC_9    , _______ , XXXXXXX ,
-    XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , KC_EQL  , KC_4    , KC_5    , KC_6    , KC_PAST , XXXXXXX ,
+    XXXXXXX , KC_LGUI , KC_LALT , KC_LSFT, KC_LCTL , _______ , _______ , /*    */ _______ , KC_EQL  , KC_4    , KC_5    , KC_6    , KC_PAST , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , KC_MINS , KC_1    , KC_2    , KC_3    , KC_DOT  , XXXXXXX ,
-    XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , KC_0    , _______ , _______ , _______ , KC_SLSH , XXXXXXX
+    XXXXXXX , _______ , _______ , _______ , _______ , KC_ESC  , _______ , /*    */ _______ , KC_0    , _______ , _______ , _______ , KC_SLSH , XXXXXXX
 ),
 
 [_FUN] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , _______ , _______ , _______ , _______ , ALT_TAB , _______ , /*    */ _______ , _______ , _______ , _______ , CLOSE   , _______ , XXXXXXX ,
-    XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , F1_     , F5_     , F9_     , KC_VOLU , XXXXXXX ,
+    XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , CLOSE   , _______ , XXXXXXX ,
+    XXXXXXX , KC_LGUI , KC_LALT , KC_LSFT, KC_LCTL , _______ , _______ , /*    */ _______ , _______ , F1_     , F5_     , F9_     , KC_VOLU , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , SNIP    , LOCK    , TASKS   , S_MEDIA , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , KC_VOLD , XXXXXXX
 ),
@@ -327,7 +361,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_SYM] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______    , _______    , _______    , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , KC_QUOT    , KC_LBRC    , KC_RBRC    , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , _______ , S(KC_MINS) , S(KC_9)    , S(KC_0)    , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
+    XXXXXXX , _______ , S(KC_MINS) , S(KC_9)    , S(KC_0)    , _______ , _______ , /*    */ _______ , _______ , KC_RCTL, KC_RSFT , KC_RALT , KC_RGUI , XXXXXXX ,
     XXXXXXX , KC_GRV  , S(KC_QUOT) , S(KC_LBRC) , S(KC_RBRC) , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , KC_BSLS , _______    , _______    , _______    , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX
 ),
@@ -335,9 +369,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_NAV] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , _______ , KC_HOME , KC_UP   , KC_END   , ALT_TAB , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , KC_INS  , KC_LEFT , KC_DOWN , KC_RIGHT , KC_PGUP , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
+    XXXXXXX , KC_INS  , KC_LEFT , KC_DOWN , KC_RIGHT , KC_PGUP , _______ , /*    */ _______ , _______ , KC_RCTL, KC_RSFT , KC_RALT , KC_RGUI , XXXXXXX ,
     XXXXXXX , KC_TAB  , _______ , _______ , _______  , KC_PGDN , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , KC_DEL  , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX
+    XXXXXXX , KC_DEL  , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , KC_ENT  , _______ , _______ , _______ , _______ , XXXXXXX
 ),
 
 };
@@ -397,6 +431,7 @@ bool achordion_eager_mod(uint8_t mod) {
 }
 
 void matrix_scan_user(void) {
+    flow_matrix_scan();
     achordion_task();
 
     const uint32_t time_since_last_input = last_input_activity_elapsed();
@@ -486,6 +521,7 @@ bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_achordion(keycode, record)) return false;
+    if (!update_flow(keycode, record->event.pressed, record->event.key)) return false;
 
     switch (keycode) {
         case ALT_TAB:
