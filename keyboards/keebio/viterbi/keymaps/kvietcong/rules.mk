@@ -1,11 +1,10 @@
+SRC += features/layer_lock.c
 SRC += features/achordion.c
 
 # VIA just stopped updating my keymaps without clearing EEPROM. I guess it wasn't working properly before.
 # VIA_ENABLE = yes
 LTO_ENABLE = yes
-NKRO_ENABLE = yes
 COMBO_ENABLE = yes
-LEADER_ENABLE = yes
 RGBLIGHT_ENABLE = yes
 TAP_DANCE_ENABLE = yes
 CAPS_WORD_ENABLE = yes
