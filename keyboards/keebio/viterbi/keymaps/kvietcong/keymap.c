@@ -244,10 +244,14 @@ tap_dance_action_t tap_dance_actions[] = {
 
 #define GHLT2 LT(_GA2, KC_ESC)
 
+#define LTHUMB LSFT_T(KC_X)
+#define RTHUMB RSFT_T(KC_X)
+
+
 static bool is_alt_tab_active = false;
 static uint16_t alt_tab_timer = 0;
 
-const uint16_t PROGMEM capsword[] = {OS_NUM, OS_NAV, COMBO_END};
+const uint16_t PROGMEM capsword[] = {LTHUMB, RTHUMB, COMBO_END};
 const uint16_t PROGMEM tg_ga1[]   = {HLT2, KC_B, COMBO_END};
 const uint16_t PROGMEM tab[]      = {HLT2, HLM, COMBO_END};
 const uint16_t PROGMEM quote[]    = {HRT2, HRM, COMBO_END};
@@ -278,13 +282,13 @@ bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode
 }
 
 const uint16_t flow_config[FLOW_COUNT][2] = {
-    {OS_NUM, KC_LALT},
-    {OS_NUM, KC_LCTL},
-    {OS_NUM, KC_LSFT},
+    {LTHUMB, KC_LALT},
+    {LTHUMB, KC_LCTL},
+    {LTHUMB, KC_LSFT},
 
-    {OS_NAV, KC_RALT},
-    {OS_NAV, KC_RCTL},
-    {OS_NAV, KC_RSFT},
+    {RTHUMB, KC_RALT},
+    {RTHUMB, KC_RCTL},
+    {RTHUMB, KC_RSFT},
 };
 
 
@@ -307,7 +311,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     XXXXXXX , _______ , KC_W    , KC_E    , R_SN    , KC_T    , _______ , /*    */ _______ , KC_Y    , KC_U    , URM     , KC_O    , _______ , XXXXXXX ,
     XXXXXXX , KC_Q    , KC_S    , KC_D    , KC_F    , KC_G    , _______ , /*    */ _______ , KC_H    , KC_J    , KC_K    , KC_L    , KC_P    , XXXXXXX ,
     XXXXXXX , KC_A    , X_CU    , C_CO    , V_PA    , KC_B    , _______ , /*    */ _______ , KC_N    , KC_M    , KC_COMM , KC_DOT  , KC_SCLN , XXXXXXX ,
-    XXXXXXX , Z_UN    , _______ , _______ , _______ , OS_NUM  , HLT1    , /*    */ HRT1    , OS_NAV  , _______ , _______ , _______ , KC_SLSH , XXXXXXX
+    XXXXXXX , Z_UN    , _______ , _______ , _______ , LTHUMB  , HLT1    , /*    */ HRT1    , RTHUMB  , _______ , _______ , _______ , KC_SLSH , XXXXXXX
 ),
 
 [_GA1] = LAYOUT_ortho_5x14(
@@ -524,6 +528,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!update_flow(keycode, record->event.pressed, record->event.key)) return false;
 
     switch (keycode) {
+        case LTHUMB:
+            if (record->tap.count && record->event.pressed) {
+                update_flow(OS_NUM, true, record->event.key);
+                update_flow(OS_NUM, false, record->event.key);
+                return false;
+            }
+            break;
+        case RTHUMB:
+            if (record->tap.count && record->event.pressed) {
+                update_flow(OS_NAV, true, record->event.key);
+                update_flow(OS_NAV, false, record->event.key);
+                return false;
+            }
+            break;
         case ALT_TAB:
             if (record->event.pressed) {
                 if (!is_alt_tab_active) {
