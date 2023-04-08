@@ -76,8 +76,7 @@ enum tap_dances {
 };
 
 enum custom_keycodes {
-    ALT_TAB = SAFE_RANGE,
-    OS_CLR,
+    OS_CLR = SAFE_RANGE,
 };
 
 typedef enum {
@@ -93,10 +92,11 @@ typedef enum {
     TD_TRIPLE_TAP_INTERRUPTED,
 } tap_state_t;
 
+
 static tap_state_t states[TD_GHLT2 + 1];
 
 // TODO: Is this even needed. I should just check state manually?
-tap_state_t current_dance(qk_tap_dance_state_t* state) {
+tap_state_t current_dance(tap_dance_state_t* state) {
     if (state->count == 1) {
         if (state->interrupted) return TD_SINGLE_TAP_INTERRUPTED;
         else if (state->pressed) return TD_SINGLE_HOLD;
@@ -112,7 +112,7 @@ tap_state_t current_dance(qk_tap_dance_state_t* state) {
     } else return TD_UNKNOWN;
 }
 
-void finish_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
+void finish_ghlt2(tap_dance_state_t* state, void* user_data) {
     states[TD_GHLT2] = current_dance(state);
     switch (states[TD_GHLT2]) {
         case TD_SINGLE_TAP:
@@ -130,7 +130,7 @@ void finish_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
         default: break;
     }
 }
-void reset_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
+void reset_ghlt2(tap_dance_state_t* state, void* user_data) {
     switch (states[TD_GHLT2]) {
         case TD_SINGLE_TAP:
         case TD_SINGLE_HOLD:
@@ -145,7 +145,7 @@ void reset_ghlt2(qk_tap_dance_state_t* state, void* user_data) {
     states[TD_GHLT2] = TD_UNKNOWN;
 }
 
-void finish_s_media(qk_tap_dance_state_t* state, void* user_data) {
+void finish_s_media(tap_dance_state_t* state, void* user_data) {
     states[TD_S_MEDIA] = current_dance(state);
     switch (states[TD_S_MEDIA]) {
         case TD_SINGLE_TAP: tap_code(KC_MPLY); break;
@@ -156,7 +156,7 @@ void finish_s_media(qk_tap_dance_state_t* state, void* user_data) {
         default: break;
     }
 }
-void reset_s_media(qk_tap_dance_state_t *state, void *user_data) {
+void reset_s_media(tap_dance_state_t *state, void *user_data) {
     switch (states[TD_S_MEDIA]) {
         case TD_SINGLE_HOLD: unregister_code(KC_MFFD); break;
         case TD_DOUBLE_HOLD: unregister_code(KC_MRWD); break;
@@ -165,28 +165,28 @@ void reset_s_media(qk_tap_dance_state_t *state, void *user_data) {
     states[TD_S_MEDIA] = TD_UNKNOWN;
 }
 
-void f1_(qk_tap_dance_state_t *state, void *user_data) {
+void f1_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 12: tap_code(KC_F1 + state->count - 1);
     }
     reset_tap_dance(state);
 }
 
-void f5_(qk_tap_dance_state_t *state, void *user_data) {
+void f5_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 8: tap_code(KC_F5 + state->count - 1);
     }
     reset_tap_dance(state);
 }
 
-void f9_(qk_tap_dance_state_t *state, void *user_data) {
+void f9_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
         case 1 ... 4: tap_code(KC_F9 + state->count - 1);
     }
     reset_tap_dance(state);
 }
 
-qk_tap_dance_action_t tap_dance_actions[] = {
+tap_dance_action_t tap_dance_actions[] = {
     [TD_S_MEDIA] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, finish_s_media, reset_s_media),
     [TD_GHLT2] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, finish_ghlt2, reset_ghlt2),
 
@@ -232,9 +232,6 @@ qk_tap_dance_action_t tap_dance_actions[] = {
 #define URM LT(_MOU, KC_I)
 
 #define GHLT2 LT(_GA2, KC_ESC)
-
-static bool is_alt_tab_active = false;
-static uint16_t alt_tab_timer = 0;
 
 const uint16_t PROGMEM capsword[] = {HLT2, HRT2, COMBO_END};
 const uint16_t PROGMEM tg_ga1[]   = {HLT2, KC_B, COMBO_END};
@@ -318,7 +315,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_FUN] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , _______ , _______ , _______ , _______ , ALT_TAB , _______ , /*    */ _______ , _______ , _______ , _______ , CLOSE   , _______ , XXXXXXX ,
+    XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , CLOSE   , _______ , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , F1_     , F5_     , F9_     , KC_VOLU , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , SNIP    , LOCK    , TASKS   , S_MEDIA , XXXXXXX ,
     XXXXXXX , _______ , _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , KC_VOLD , XXXXXXX
@@ -334,7 +331,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_NAV] = LAYOUT_ortho_5x14(
     XXXXXXX , _______ , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
-    XXXXXXX , _______ , KC_HOME , KC_UP   , KC_END   , ALT_TAB , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
+    XXXXXXX , _______ , KC_HOME , KC_UP   , KC_END   , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , KC_INS  , KC_LEFT , KC_DOWN , KC_RIGHT , KC_PGUP , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , KC_TAB  , _______ , _______ , _______  , KC_PGDN , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX ,
     XXXXXXX , KC_DEL  , _______ , _______ , _______  , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______ , _______ , XXXXXXX
@@ -401,11 +398,6 @@ void matrix_scan_user(void) {
 
     const uint32_t time_since_last_input = last_input_activity_elapsed();
     if (time_since_last_input > LAYER_TIMEOUT && !IS_LAYER_ON(_GA1)) layer_clear();
-
-    if (is_alt_tab_active && timer_elapsed(alt_tab_timer) > 500) {
-        unregister_code(KC_LALT);
-        is_alt_tab_active = false;
-    }
 
     if (time_since_last_input > RGBLIGHT_TIMEOUT) rgblight_disable_noeeprom();
     else if(!rgblight_is_enabled()) rgblight_enable_noeeprom();
@@ -474,32 +466,21 @@ bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
     return false;
 }
 
-bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
+uint16_t get_quick_tap_term(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         case HLT2:
         case HRT2:
         case GHLT2:
-            return true;
+            return 100;
+        default:
+            return QUICK_TAP_TERM;
     }
-    return false;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!process_achordion(keycode, record)) return false;
 
     switch (keycode) {
-        case ALT_TAB:
-            if (record->event.pressed) {
-                if (!is_alt_tab_active) {
-                    is_alt_tab_active = true;
-                    register_code(KC_LALT);
-                }
-                alt_tab_timer = timer_read();
-                register_code(KC_TAB);
-            } else {
-                unregister_code(KC_TAB);
-            }
-            break;
         case OS_CLR:
             clear_oneshot_layer_state(ONESHOT_OTHER_KEY_PRESSED);
             clear_oneshot_mods();
