@@ -167,21 +167,24 @@ void reset_s_media(tap_dance_state_t *state, void *user_data) {
 
 void f1_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
-        case 1 ... 22: tap_code(KC_F1 + state->count - 1);
+        case 1 ... 12: tap_code(KC_F1 + state->count - 1);
+        case 13 ... 24: tap_code(KC_F13 + state->count - 13);
     }
     reset_tap_dance(state);
 }
 
 void f5_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
-        case 1 ... 18: tap_code(KC_F5 + state->count - 1);
+        case 1 ... 8: tap_code(KC_F5 + state->count - 1);
+        case 9 ... 20: tap_code(KC_F13 + state->count - 9);
     }
     reset_tap_dance(state);
 }
 
 void f9_(tap_dance_state_t *state, void *user_data) {
     switch (state->count) {
-        case 1 ... 14: tap_code(KC_F9 + state->count - 1);
+        case 1 ... 4: tap_code(KC_F9 + state->count - 1);
+        case 5 ... 16: tap_code(KC_F13 + state->count - 5);
     }
     reset_tap_dance(state);
 }
@@ -322,10 +325,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_NUM] = LE_LAYOUT(
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_PPLS , KC_7    , KC_8    , KC_9    , KC_PAST ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_EQL  , KC_4    , KC_5    , KC_6    , KC_DOT  ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_MINS , KC_1    , KC_2    , KC_3    , KC_SLSH ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_0    , _______ , _______ , _______ , _______
+    _______ , _______ , _______ , _______ , _______ , /*    */ KC_PPLS , KC_7 , KC_8    , KC_9    , KC_PAST ,
+    _______ , _______ , _______ , _______ , _______ , /*    */ KC_EQL  , KC_4 , KC_5    , KC_6    , KC_DOT  ,
+    _______ , _______ , _______ , _______ , _______ , /*    */ KC_MINS , KC_1 , KC_2    , KC_3    , KC_SLSH ,
+    _______ , _______ , _______ , _______ , _______ , /*    */ _______ , KC_0 , _______ , _______ , _______
 ),
 
 [_FUN] = LE_LAYOUT(
