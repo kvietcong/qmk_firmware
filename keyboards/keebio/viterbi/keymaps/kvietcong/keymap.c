@@ -25,8 +25,12 @@ void oneshot_mods_changed_user(uint8_t mods) {
     else layer_state_set(layer_state);
 }
 
+static bool did_layer_change_during_rgb_off = false;
 layer_state_t layer_state_set_user(layer_state_t state) {
     if (get_oneshot_mods()) return state;
+
+    if(!rgblight_is_enabled())
+        did_layer_change_during_rgb_off = true;
 
     // TODO: Figure out how to set ranges on peripheral side
     switch (get_highest_layer(state)) {
@@ -238,32 +242,24 @@ tap_dance_action_t tap_dance_actions[] = {
 #define GHLT2 LT(_GA2, KC_ESC)
 
 const uint16_t PROGMEM capsword[] = {HLT2, HRT2, COMBO_END};
-const uint16_t PROGMEM tg_ga1[]   = {HLT2, KC_B, COMBO_END};
-const uint16_t PROGMEM tab[]      = {HLT2, HLM, COMBO_END};
-const uint16_t PROGMEM quote[]    = {HRT2, HRM, COMBO_END};
-const uint16_t PROGMEM delete[]    = {HRT1, HRI, COMBO_END};
 combo_t key_combos[] = {
     // Always available
     COMBO(capsword, CW_TOGG),
-    COMBO(tg_ga1, TG(_GA1)),
-    COMBO(quote, KC_QUOT),
-    COMBO(delete, KC_DEL),
-
-    // Disabled when gaming
-    COMBO(tab, KC_TAB),
 
     // Gaming only
+
+    // Disabled when gaming
 };
 uint16_t COMBO_LEN = ARRAY_SIZE(key_combos);
 
 bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode, keyrecord_t *record) {
     switch (combo_index) {
-        case 4 ... 4:
-            return !IS_LAYER_ON(_GA1);
-        /* case 4 ... 100: */
-        /*     return IS_LAYER_ON(_GA1); */
-        default:
+        case 1 ... 1: // Always available
             return true;
+        case 2 ... 100: // Gaming only
+            return IS_LAYER_ON(_GA1) || IS_LAYER_ON(_GA2);
+        default: // Off when gaming
+            return !IS_LAYER_ON(_GA1) && !IS_LAYER_ON(_GA2);
     }
 }
 
@@ -290,66 +286,66 @@ bool combo_should_trigger(uint16_t combo_index, combo_t *combo, uint16_t keycode
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_BAS] = LE_LAYOUT(
-    KC_Q    , KC_W    , KC_E   , R_SN , KC_T , /*    */ KC_Y , KC_U , URM     , KC_O    , KC_P    ,
-    HLP     , HLR     , HLM    , HLI  , HLX  , /*    */ HRX  , HRI  , HRM     , HRR     , HRP     ,
-    Z_UN    , X_CU    , C_CO   , V_PA , KC_B , /*    */ KC_N , KC_M , KC_COMM , KC_DOT  , KC_SLSH ,
-    _______ , _______ , KC_TAB , HLT2 , HLT1 , /*    */ HRT1 , HRT2 , KC_QUOT , _______ , _______
+    KC_Q    , KC_W    , KC_E   , R_SN , KC_T , /* */ KC_Y , KC_U , URM     , KC_O    , KC_P    ,
+    HLP     , HLR     , HLM    , HLI  , HLX  , /* */ HRX  , HRI  , HRM     , HRR     , HRP     ,
+    Z_UN    , X_CU    , C_CO   , V_PA , KC_B , /* */ KC_N , KC_M , KC_COMM , KC_DOT  , KC_SLSH ,
+    _______ , _______ , KC_TAB , HLT2 , HLT1 , /* */ HRT1 , HRT2 , KC_QUOT , _______ , _______
 ),
 
 [_GA1] = LE_LAYOUT(
-    KC_Q    , KC_W    , KC_E    , KC_R  , KC_T   , /*    */ KC_Y    , KC_U    , KC_I     , KC_O    , KC_P    ,
-    KC_A    , KC_S    , KC_D    , KC_F  , KC_G   , /*    */ KC_H    , KC_J    , KC_K     , KC_L    , KC_SCLN ,
-    KC_Z    , KC_X    , KC_C    , KC_V  , KC_B   , /*    */ KC_N    , KC_M    , KC_COMM  , KC_DOT  , KC_SLSH ,
-    _______ , _______ , KC_LCTL , GHLT2 , KC_SPC , /*    */ _______ , _______ , TG(_GA1) , _______ , _______
+    KC_Q    , KC_W    , KC_E    , KC_R  , KC_T   , /* */ KC_Y    , KC_U    , KC_I     , KC_O    , KC_P    ,
+    KC_A    , KC_S    , KC_D    , KC_F  , KC_G   , /* */ KC_H    , KC_J    , KC_K     , KC_L    , KC_SCLN ,
+    KC_Z    , KC_X    , KC_C    , KC_V  , KC_B   , /* */ KC_N    , KC_M    , KC_COMM  , KC_DOT  , KC_SLSH ,
+    _______ , _______ , KC_LCTL , GHLT2 , KC_SPC , /* */ _______ , _______ , TG(_GA1) , _______ , _______
 ),
 
 [_GA2] = LE_LAYOUT(
-    KC_LCTL , KC_1    , _______   , KC_2    , KC_TAB  , /*    */ _______  , _______  , _______  , _______ , _______ ,
-    KC_LSFT , _______ , _______   , _______ , KC_3    , /*    */ _______  , _______  , MO(_SYM) , _______ , KC_LGUI ,
-    KC_LALT , KC_5    , OSL(_GA3) , KC_4    , KC_GRV  , /*    */ _______  , _______  , _______  , _______ , _______ ,
-    _______ , _______ , _______   , _______ , _______ , /*    */ MO(_NUM) , MO(_FUN) , _______  , _______ , _______
+    KC_LCTL , KC_1    , _______   , KC_2    , KC_TAB  , /* */ _______  , _______  , _______  , _______ , _______ ,
+    KC_LSFT , _______ , _______   , _______ , KC_3    , /* */ _______  , _______  , MO(_SYM) , _______ , KC_LGUI ,
+    KC_LALT , KC_5    , OSL(_GA3) , KC_4    , KC_GRV  , /* */ _______  , _______  , _______  , _______ , _______ ,
+    _______ , _______ , _______   , _______ , _______ , /* */ MO(_NUM) , MO(_FUN) , _______  , _______ , _______
 ),
 
 [_GA3] = LE_LAYOUT(
-    _______ , _______  , _______ , _______ , _______  , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    _______ , S(KC_F2) , KC_0    , KC_F2   , TO(_BAS) , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    _______ , QCK_CAP  , KC_LGUI , F1_     , _______  , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    _______ , _______  , _______ , _______ , _______  , /*    */ _______ , _______ , _______ , _______ , _______
+    _______ , _______  , _______ , _______ , _______  , /* */ _______ , _______ , _______ , _______ , _______ ,
+    _______ , S(KC_F2) , KC_0    , KC_F2   , TO(_BAS) , /* */ _______ , _______ , _______ , _______ , _______ ,
+    _______ , QCK_CAP  , KC_LGUI , F1_     , _______  , /* */ _______ , _______ , _______ , _______ , _______ ,
+    _______ , _______  , _______ , _______ , _______  , /* */ _______ , _______ , _______ , _______ , _______
 ),
 
 [_MOU] = LE_LAYOUT(
-    _______ , KC_WH_L , KC_MS_U , KC_WH_R , _______ , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    KC_BTN1 , KC_MS_L , KC_MS_D , KC_MS_R , KC_WH_U , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    KC_BTN2 , _______ , _______ , _______ , KC_WH_D , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ _______ , _______ , _______ , _______ , _______
+    _______ , KC_WH_L , KC_MS_U , KC_WH_R , _______ , /* */ _______ , _______ , _______ , _______ , _______ ,
+    KC_BTN1 , KC_MS_L , KC_MS_D , KC_MS_R , KC_WH_U , /* */ _______ , _______ , _______ , _______ , _______ ,
+    KC_BTN2 , _______ , _______ , _______ , KC_WH_D , /* */ _______ , _______ , _______ , _______ , _______ ,
+    _______ , _______ , _______ , _______ , _______ , /* */ _______ , _______ , _______ , _______ , _______
 ),
 
 [_NUM] = LE_LAYOUT(
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_PPLS , KC_7 , KC_8    , KC_9    , KC_PAST ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_EQL  , KC_4 , KC_5    , KC_6    , KC_DOT  ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ KC_MINS , KC_1 , KC_2    , KC_3    , KC_SLSH ,
-    _______ , _______ , _______ , _______ , _______ , /*    */ _______ , KC_0 , _______ , _______ , _______
+    _______ , _______ , _______ , _______ , _______ , /* */ KC_PPLS , KC_7 , KC_8    , KC_9    , KC_PAST ,
+    _______ , _______ , _______ , _______ , _______ , /* */ KC_EQL  , KC_4 , KC_5    , KC_6    , KC_DOT  ,
+    _______ , _______ , _______ , _______ , _______ , /* */ KC_MINS , KC_1 , KC_2    , KC_3    , KC_SLSH ,
+    _______ , _______ , _______ , _______ , _______ , /* */ _______ , KC_0 , _______ , _______ , _______
 ),
 
 [_FUN] = LE_LAYOUT(
-    _______ , _______ , _______ , _______ , _______  , /*    */ _______ , _______ , _______ , CLOSE   , KC_VOLU ,
-    _______ , _______ , _______ , _______ , TO(_GA1) , /*    */ _______ , F1_     , F5_     , F9_     , S_MEDIA ,
-    _______ , _______ , _______ , _______ , _______  , /*    */ _______ , SNIP    , LOCK    , TASKS   , KC_VOLD ,
-    _______ , _______ , _______ , _______ , _______  , /*    */ _______ , _______ , _______ , _______ , _______
+    _______ , _______ , _______ , _______ , _______  , /* */ _______ , _______ , _______ , CLOSE   , KC_VOLU ,
+    _______ , _______ , _______ , _______ , TO(_GA1) , /* */ _______ , F1_     , F5_     , F9_     , S_MEDIA ,
+    _______ , _______ , _______ , _______ , _______  , /* */ _______ , SNIP    , LOCK    , TASKS   , KC_VOLD ,
+    _______ , _______ , _______ , _______ , _______  , /* */ _______ , _______ , _______ , _______ , _______
 ),
 
 [_SYM] = LE_LAYOUT(
-    _______ , KC_QUOT    , KC_LBRC    , KC_RBRC    , _______ , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    KC_GRV  , S(KC_MINS) , S(KC_9)    , S(KC_0)    , _______ , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    KC_BSLS , S(KC_QUOT) , S(KC_LBRC) , S(KC_RBRC) , _______ , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    _______ , _______    , _______    , _______    , _______ , /*    */ _______ , _______ , _______ , _______ , _______
+    _______ , KC_QUOT    , KC_LBRC    , KC_RBRC    , _______ , /* */ _______ , _______ , _______ , _______ , _______ ,
+    KC_GRV  , S(KC_MINS) , S(KC_9)    , S(KC_0)    , _______ , /* */ _______ , _______ , _______ , _______ , _______ ,
+    KC_BSLS , S(KC_QUOT) , S(KC_LBRC) , S(KC_RBRC) , _______ , /* */ _______ , _______ , _______ , _______ , _______ ,
+    _______ , _______    , _______    , _______    , _______ , /* */ KC_DEL  , _______ , _______ , _______ , _______
 ),
 
 [_NAV] = LE_LAYOUT(
-    KC_INS  , KC_HOME , KC_UP   , KC_END   , _______ , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    KC_TAB  , KC_LEFT , KC_DOWN , KC_RIGHT , KC_PGUP , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    KC_DEL  , _______ , _______ , _______  , KC_PGDN , /*    */ _______ , _______ , _______ , _______ , _______ ,
-    _______ , _______ , _______ , _______  , _______ , /*    */ _______ , _______ , _______ , _______ , _______
+    KC_INS  , KC_HOME , KC_UP   , KC_END   , _______ , /* */ _______ , _______ , _______ , _______ , _______ ,
+    KC_TAB  , KC_LEFT , KC_DOWN , KC_RIGHT , KC_PGUP , /* */ _______ , _______ , _______ , _______ , _______ ,
+    KC_DEL  , _______ , _______ , _______  , KC_PGDN , /* */ _______ , _______ , _______ , _______ , _______ ,
+    _______ , _______ , _______ , _______  , _______ , /* */ _______ , _______ , _______ , _______ , _______
 ),
 
 };
@@ -372,7 +368,20 @@ bool achordion_chord(uint16_t tap_hold_keycode,
 
         case GHLT2:
             return true;
+
+        case HLR:
+            if (other_keycode == KC_TAB) return true;
     }
+
+    switch (other_keycode) {
+        case HLT1:
+        case HLT2:
+        case HRT1:
+        case HRT2:
+        case GHLT2:
+            return true;
+    }
+
     return achordion_opposite_hands(tap_hold_record, other_record);
 }
 
@@ -409,13 +418,18 @@ bool achordion_eager_mod(uint8_t mod) {
 }
 
 void matrix_scan_user(void) {
+    const uint32_t time_since_last_input = last_input_activity_elapsed();
+
     achordion_task();
 
-    const uint32_t time_since_last_input = last_input_activity_elapsed();
-    if (time_since_last_input > LAYER_TIMEOUT) layer_clear();
+    if (time_since_last_input > LAYER_TIMEOUT) layer_move(_BAS);
 
     if (time_since_last_input > RGBLIGHT_TIMEOUT) rgblight_disable_noeeprom();
-    else if(!rgblight_is_enabled()) rgblight_enable_noeeprom();
+    else if(!rgblight_is_enabled()) {
+        rgblight_enable_noeeprom();
+        if (did_layer_change_during_rgb_off)
+            layer_state_set_user(layer_state); // I need to do this b/c QMK doesn't change layer lights when RGB is off
+    }
 }
 
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
